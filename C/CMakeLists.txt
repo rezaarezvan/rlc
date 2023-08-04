@@ -7,13 +7,33 @@ project(rcl_leetcode)
 # Specify the C Standard
 set(CMAKE_C_STANDARD 99)
 
-# Add a library for each solution
-# Replace "leetcode_001" with the name of your C file without the extension
-add_library(leetcode_001 STATIC src/leetcode_001.c)
+# Detect all solution and test files
+file(GLOB SRC_SOURCES "src/*.c")
+file(GLOB TEST_SOURCES "test/*.c")
 
-# Add an executable for each test
-# Replace "test_leetcode_001" with the name of your test file without the extension
-add_executable(test_leetcode_001 test/test_leetcode_001.c)
+# Iterate over each solution file
+foreach(srcfile ${SRC_SOURCES})
+  # Get the name of the file without the extension
+  get_filename_component(srcname ${srcfile} NAME_WE)
 
-# Link the test executable with the solution library
-target_link_libraries(test_leetcode_001 leetcode_001)
+  # Add a library for the solution
+  add_library(${srcname} STATIC ${srcfile})
+endforeach()
+
+# Iterate over each test file
+foreach(testfile ${TEST_SOURCES})
+  # Get the name of the file without the extension
+  get_filename_component(testname ${testfile} NAME_WE)
+
+  # Extract the number from the test name
+  string(REGEX REPLACE "test_leetcode_" "" testnum ${testname})
+
+  # Construct the corresponding solution name
+  set(srcname "leetcode_${testnum}")
+
+  # Add an executable for the test
+  add_executable(${testname} ${testfile})
+
+  # Link the test executable with the corresponding solution library
+  target_link_libraries(${testname} ${srcname})
+endforeach()
